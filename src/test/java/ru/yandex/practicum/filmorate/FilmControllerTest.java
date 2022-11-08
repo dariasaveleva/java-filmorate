@@ -7,24 +7,24 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.services.FilmService;
 
-import java.time.Duration;
 import java.time.LocalDate;
 
 public class FilmControllerTest {
     FilmController filmController;
+    FilmService filmService;
+    TestHelper testHelper;
     Film film;
     Film film1;
 
     @BeforeEach
     void BeforeEach () {
         filmController = new FilmController();
-        film = Film.builder()
-                .name("Film name")
-                .description("Film description")
-                .releaseDate(LocalDate.of(2022,2,10))
-                .duration(90)
-                .build();
+        testHelper = new TestHelper();
+        filmService = new FilmService();
+        film = testHelper.getFilm().get(0);
+        film1 = testHelper.getFilm().get(1);
     }
 
     @Test
@@ -36,13 +36,7 @@ public class FilmControllerTest {
     @Test
     public void shouldUpdateFilm() {
         filmController.createFilm(film);
-        film1 = Film.builder()
-                .id(film.getId())
-                .name("New name")
-                .description("Film description")
-                .releaseDate(LocalDate.of(2022,2,10))
-                .duration(90)
-                .build();
+        film1.setId(film.getId());
         filmController.updateFilm(film1);
         assertEquals("New name", filmController.findAllFilms().get(0).getName());
     }
@@ -50,13 +44,13 @@ public class FilmControllerTest {
     @Test
     public void shouldValidateReleaseDate() {
         film.setReleaseDate(LocalDate.of(1894,2,11));
-        assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        assertThrows(ValidationException.class, () -> filmService.validateFilm(film));
     }
 
     @Test
     public void shouldValidateDuration() {
         film.setDuration(-1);
-        assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        assertThrows(ValidationException.class, () -> filmService.validateFilm(film));
     }
 
 }
