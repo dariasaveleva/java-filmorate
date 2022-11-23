@@ -2,12 +2,42 @@ package ru.yandex.practicum.filmorate;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.services.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 public class TestHelper {
+
+    FilmService filmService;
+    UserService userService;
+    InMemoryFilmStorage filmStorage;
+    InMemoryUserStorage userStorage;
+    Film film;
+    Film film1;
+    Film film2;
+    User user;
+    User user1;
+    User user2;
+
+
+    public TestHelper() {
+        filmStorage = new InMemoryFilmStorage();
+        userStorage = new InMemoryUserStorage();
+        filmService = new FilmService(filmStorage);
+        userService = new UserService(userStorage);
+        film = getFilms().get(0);
+        film1 = getFilms().get(1);
+        film2 = getFilms().get(2);
+        user = getUsers().get(0);
+        user1 = getUsers().get(1);
+        user2 = getUsers().get(2);
+    }
 
     public List<Film> getFilms() {
         Film film = Film.builder()
@@ -21,15 +51,15 @@ public class TestHelper {
         Film film1 = Film.builder()
                 .id(film.getId())
                 .name("New name")
-                .description("Film description")
+                .description("Film description1")
                 .releaseDate(LocalDate.of(2022,2,10))
                 .duration(90)
                 .usersLikes(new HashSet<>())
                 .build();
 
         Film film2 = Film.builder()
-                .name("New name")
-                .description("Film description")
+                .name("New name2")
+                .description("Film description2")
                 .releaseDate(LocalDate.of(2022,2,10))
                 .duration(90)
                 .usersLikes(new HashSet<>())
@@ -51,12 +81,9 @@ public class TestHelper {
                 .friends(new HashSet<>())
                 .build();
 
-//        User user = new User(1,"email", "login", "name",
-//                LocalDate.of(2000, 1, 15), new HashSet<>());
-
         User user1 = User.builder()
                 .id(user.getId())
-                .name("New User name")
+                .name("")
                 .email("newemail@mail.ru")
                 .login("login")
                 .birthday(LocalDate.of(2000,2,10))
@@ -79,5 +106,18 @@ public class TestHelper {
         return users;
     }
 
+    public void createFilm() {
+        filmService.addFilm(film);
+        filmService.addFilm(film1);
+    }
 
+    public void createUser() {
+        userService.addUser(user);
+        userService.addUser(user1);
+        userService.addUser(user2);
+    }
+
+    public void createFriend() {
+        userService.addFriend(user.getId(), user1.getId());
+    }
 }
