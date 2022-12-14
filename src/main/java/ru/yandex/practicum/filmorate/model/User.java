@@ -1,19 +1,22 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.*;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class User {
 
-    @NotNull
+    @PositiveOrZero
     private int id;
     @NotBlank
     @Email
@@ -22,9 +25,4 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-
-    @JsonIgnore
-    private Set<Integer> friends;
-
-
 }

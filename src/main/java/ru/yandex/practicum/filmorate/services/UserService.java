@@ -3,58 +3,81 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.impl.UserDaoImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
 
-    private final UserStorage userStorage;
+    private final UserDaoImpl userDao;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserDaoImpl userDao) {
+        this.userDao = userDao;
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userDao.getUsers();
     }
 
     public User getUser(int id) {
-        if (userStorage.getUser(id) == null) {
-            throw new NotFoundException("Пользователь не существует.");
-        }
-        return userStorage.getUser(id);
+        checkUserExistence(id);
+        return userDao.getById(id).orElseThrow();
     }
 
     public User addUser(User user) {
-        log.info("Проверяем, не существует ли такой пользователь");
-        validateUserBeforeAdd(user.getId());
         log.info("Валидируем пользователя ");
         validateUser(user);
         log.info("Создаем пользователя.");
-        user.setFriends(new HashSet<>());
-        userStorage.saveUser(user);
-        return user;
+        return userDao.addUser(user);
     }
 
     public User updateUser(User user) {
-        log.info("Проверяем, существует ли такой пользователь");
-        validateNonExistence(user.getId());
         log.info("Валидируем пользователя ");
+        checkUserExistence(user.getId());
         validateUser(user);
         log.info("Обновляем пользователя.");
-        user.setFriends(new HashSet<>());
-        userStorage.updateUser(user);
-        return user;
+        return userDao.update(user);
+    }
+
+
+    //добавление друзей
+    public List<Integer> followFriend(int userId, int friendId) {
+        checkUserExistence(userId);
+        checkUserExistence(friendId);
+        log.info("Пользователь c id {} отправил заявку на добавление пользователю с id {}",
+                userId, friendId);
+        return userDao.followFriend(userId, friendId);
+    }
+
+    public void deleteById(int userId) {
+        userDao.deleteById(userId);
+    }
+
+    public List<Integer> unfollowFriend(int userId, int friendId) {
+        checkUserExistence(userId);
+        checkUserExistence(friendId);
+        log.info("Пользователь c id {} удалил заявку на добавление к  пользователю с id {} ",
+                userId, friendId);
+        return userDao.unfollowFriend(userId, friendId);
+    }
+
+    public List<User> getUsersFriends(int userId) {
+        checkUserExistence(userId);
+        log.info("Выгружен список друзей пользователя {}", userId);
+        return userDao.getUsersFriends(userId);
+    }
+
+    public List<User> getCommonFriends(int userId, int otherUserId) {
+        checkUserExistence(userId);
+        checkUserExistence(otherUserId);
+        return userDao.getCommonFriends(userId, otherUserId);
     }
 
     public void validateUser(User user) {
@@ -65,55 +88,10 @@ public class UserService {
         if (user.getName().equals("")) user.setName(user.getLogin());
     }
 
-    public void validateUserBeforeAdd(int userId) {
-         if (userStorage.isSaved(userId))
-             throw new ValidationException("Пользователь уже существует. " +
-                     "Для обновления используйте запрос PUT");
+    public void checkUserExistence(int userId) {
+        if (userDao.getById(userId).isEmpty()) {
+            log.info("Запрашиваемый пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
+        }
     }
-
-    public void validateNonExistence(int userId) {
-        if (!(userStorage.isSaved(userId)))
-            throw new NotFoundException("Пользователь не существует.");
-    }
-
-    //добавление друзей
-    public List<User> addFriend(int userId, int friendId) {
-        log.info("Проверяем, существует ли такой пользователь");
-        validateNonExistence(userId);
-        validateNonExistence(friendId);
-        User user = userStorage.getUser(userId);
-        User friend = userStorage.getUser(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        log.info("Пользователь {} и пользователь {} добавлены в друзья друг к другу", user, friend);
-        return List.of(user, friend);
-    }
-
-    public List<User> removeFriend(int userId, int friendId) {
-        User user1 = userStorage.getUser(userId);
-        User friend = userStorage.getUser(friendId);
-        if (!(user1.getFriends().contains(friendId)))
-            throw new RuntimeException();
-        user1.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-        log.info("Пользователь {} и пользователь {} удалены из друзей друг друга", user1, friend);
-        return List.of(user1, friend);
-    }
-
-    public List<Integer> getUsersFriends(int userId) {
-        log.info("Пользователь {} и пользователь {} добавлены в друзья друг к другу");
-        return userStorage.getUser(userId).getFriends().stream()
-                .collect(Collectors.toList());
-    }
-
-    public List<User> getCommonFriends(int userId, int otherUserId) {
-        User user = userStorage.getUser(userId);
-        User otherUser = userStorage.getUser(otherUserId);
-
-        return user.getFriends().stream()
-                .filter(friendId -> otherUser.getFriends().contains(friendId))
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
-    }
-
 }

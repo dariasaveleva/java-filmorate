@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Film {
     @NonNull
@@ -20,7 +20,6 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private long duration;
-
-    @JsonIgnore
-    private Set<Integer> usersLikes;
+    private Mpa mpa;
+    private List<Genre> genres;
 }
