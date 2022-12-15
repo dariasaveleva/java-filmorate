@@ -116,8 +116,8 @@ public class FilmDaoImpl implements FilmDao {
     @Override
     public Optional<Film> deleteById(int id) {
         Optional<Film> film = getById(id);
-        String deleteGenre = "DELETE FROM film WHERE film_id = ?";
-        String deleteFilm = "DELETE FROM film WHERE film_id = ?";
+        String deleteGenre = "DELETE FROM FILM_GENRE WHERE film_id = ?";
+        String deleteFilm = "DELETE FROM FILM WHERE film_id = ?";
         jdbcTemplate.update(deleteGenre, id);
         jdbcTemplate.update(deleteFilm, id);
         return film;

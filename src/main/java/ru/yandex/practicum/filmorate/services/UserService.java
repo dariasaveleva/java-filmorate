@@ -23,11 +23,13 @@ public class UserService {
     }
 
     public List<User> getUsers() {
+        log.info("Возращаем всех пользователей");
         return userDao.getUsers();
     }
 
     public User getUser(int id) {
         checkUserExistence(id);
+        log.info("Возращаем пользователя {}", id);
         return userDao.getById(id).orElseThrow();
     }
 
@@ -77,6 +79,8 @@ public class UserService {
     public List<User> getCommonFriends(int userId, int otherUserId) {
         checkUserExistence(userId);
         checkUserExistence(otherUserId);
+        log.info("Выгружен список общих друзей для пользователя {} и пользователя {} ",
+                userId, otherUserId);
         return userDao.getCommonFriends(userId, otherUserId);
     }
 

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.*;
 
@@ -14,15 +15,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
 
     @PositiveOrZero
-    private int id;
+    int id;
     @NotBlank
     @Email
-    private String email;
+    String email;
     @NotBlank
-    private String login;
-    private String name;
-    private LocalDate birthday;
+    String login;
+    String name;
+    LocalDate birthday;
 }
