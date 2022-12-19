@@ -1,26 +1,27 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
     @NonNull
-    private int id;
+    int id;
     @NotBlank
-    private String name;
+    String name;
     @Size(min=1, max = 200)
-    private String description;
-    private LocalDate releaseDate;
-    private long duration;
-
-    @JsonIgnore
-    private Set<Integer> usersLikes;
+    String description;
+    LocalDate releaseDate;
+    long duration;
+    Mpa mpa;
+    List<Genre> genres;
 }
